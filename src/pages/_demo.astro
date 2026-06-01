@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SkinGrid from '../components/SkinGrid.astro';
+import Pagination from '../components/Pagination.astro';
+import AdSlot from '../components/AdSlot.astro';
+import type { SkinCardData } from '../lib/db/queries';
+
+const MOCK_TAGS_CLASSIC = [{ slug: 'classic', name: 'Classic', type: 'model' }];
+const MOCK_TAGS_SLIM = [{ slug: 'slim', name: 'Slim', type: 'model' }];
+
+function mockSkin(i: number): SkinCardData {
+  const models = ['classic', 'slim'] as const;
+  return {
+    slug: `demo-skin-${i}-abcd1234`,
+    display_name: `Demo Skin ${i}`,
+    source_username: `Player${i}`,
+    model: models[i % 2]!,
+    description: `A ${models[i % 2]} Minecraft skin for Player${i}.`,
+    created_at: Date.now() - i * 86400000,
+    tags: i % 2 === 0 ? MOCK_TAGS_CLASSIC : MOCK_TAGS_SLIM,
+  };
+}
+
+const mockSkins: SkinCardData[] = Array.from({ length: 24 }, (_, i) => mockSkin(i + 1));
+---
+<BaseLayout
+  title="UI Demo"
+  description="Step 4 demo page — verifying layout, components, and ad slots."
+  noindex={true}
+>
+  <div class="container-content py-8">
+    <div class="mb-8 rounded-lg border border-dashed border-yellow-600/50 bg-yellow-950/20 px-4 py-3 text-sm text-yellow-500">
+      <strong>Demo page</strong> — verifying Step 4 UI components. Skin avatars will 404 until Step 5 (image endpoints) is complete.
+    </div>
+
+    <div class="mb-8">
+      <AdSlot adSlot="demo-top" format="horizontal" label="Top Banner Ad Placeholder" />
+    </div>
+
+    <section class="mb-10">
+      <h1 class="section-heading text-2xl font-bold mb-2">Skinora</h1>
+      <p class="text-zinc-400 text-sm mb-6">Browse thousands of unique Minecraft skins.</p>
+
+      <h2 class="section-heading">Recent Skins</h2>
+      <SkinGrid skins={mockSkins} adFrequency={12} />
+    </section>
+
+    <Pagination currentPage={1} totalPages={8} baseUrl="/_demo" />
+
+    <div class="mt-10">
+      <AdSlot adSlot="demo-bottom" format="rectangle" label="Bottom Rectangle Ad Placeholder" />
+    </div>
+  </div>
+</BaseLayout>

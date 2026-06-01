@@ -1,0 +1,35 @@
+---
+interface Props {
+  slug: string;
+  width?: number;
+  height?: number;
+}
+
+const { slug, width = 300, height = 400 } = Astro.props;
+---
+<div
+  class="skin-viewer-wrap skin-checker rounded-lg overflow-hidden flex items-center justify-center"
+  style={`width:${width}px;height:${height}px;`}
+  data-slug={slug}
+  data-width={width}
+  data-height={height}
+>
+  <canvas
+    class="skin-viewer-canvas block"
+    style={`width:${width}px;height:${height}px;`}
+    aria-label="3D Minecraft skin preview"
+  ></canvas>
+  <noscript>
+    <img
+      src={`/api/avatar/${slug}.png?v=7`}
+      alt="Minecraft skin avatar"
+      width={width}
+      height={height}
+      class="object-contain pixelated"
+    />
+  </noscript>
+</div>
+
+<script>
+  import '../scripts/skin-viewer';
+</script>

@@ -1,0 +1,124 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SkinGrid from '../components/SkinGrid.astro';
+import { getRandomSkins, listTags } from '../lib/db/queries';
+import { SITE_NAME, SITE_DESCRIPTION, canonicalUrl } from '../lib/seo';
+
+const [skins, allTags] = await Promise.all([
+  getRandomSkins(24),
+  listTags(),
+]);
+
+const topTags = allTags.slice(0, 16);
+---
+<BaseLayout
+  title={SITE_NAME}
+  description={SITE_DESCRIPTION}
+  canonical={canonicalUrl('/')}
+>
+  <div class="container-content py-10 space-y-10">
+
+    <section class="relative text-center pt-6 pb-2">
+      <div aria-hidden="true" class="hero-aurora"></div>
+      <h1 class="relative text-5xl sm:text-7xl font-extrabold tracking-tight">
+        <span class="hero-title-gradient">Arctus MC</span>
+      </h1>
+      <p class="relative mt-4 text-frost-300 text-lg sm:text-xl max-w-xl mx-auto">
+        A frozen archive of Minecraft skins. Spin the wheel or thaw out a style.
+      </p>
+
+      <form
+        action="/tag/classic"
+        method="get"
+        id="search-form"
+        class="relative mt-6 mx-auto max-w-md flex items-stretch gap-2"
+        role="search"
+      >
+        <label class="sr-only" for="search-input">Search by color or style</label>
+        <input
+          id="search-input"
+          type="search"
+          placeholder="Search a color or style (e.g. blue, slim, dark)"
+          autocomplete="off"
+          class="flex-1 min-w-0 rounded-lg bg-frost-900/60 border border-frost-700/70 px-4 py-2.5 text-sm text-frost-100 placeholder-frost-500 backdrop-blur-md focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/40 transition"
+        />
+        <button
+          type="submit"
+          class="inline-flex items-center justify-center px-4 py-2.5 rounded-lg bg-brand-500 hover:bg-brand-400 text-frost-950 text-sm font-semibold transition-colors"
+        >
+          Search
+        </button>
+      </form>
+    </section>
+
+    {topTags.length > 0 && (
+      <section>
+        <h2 class="section-heading">Browse by style</h2>
+        <div class="flex flex-wrap gap-2">
+          {topTags.map((tag) => (
+            <a href={`/tag/${tag.slug}`} class="tag hover:no-underline">
+              {tag.name}
+              <span class="ml-1.5 text-frost-500 text-xs">({tag.count})</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <section>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="section-heading mb-0">Random skins</h2>
+        <div class="flex items-center gap-3">
+          <button
+            class="js-refresh-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-500 hover:bg-brand-400 text-frost-950 text-sm font-semibold transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-label="Load new random skins"
+          >
+            <svg
+              class="js-refresh-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="23 4 23 10 17 10"/>
+              <polyline points="1 20 1 14 7 14"/>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+            </svg>
+            Refresh
+          </button>
+          <a href="/random" class="text-sm text-brand-300 hover:text-brand-200 transition-colors">See all →</a>
+        </div>
+      </div>
+      <div id="skin-grid-container">
+        <SkinGrid skins={skins} adFrequency={12} />
+      </div>
+    </section>
+
+  </div>
+</BaseLayout>
+
+<script>
+  import '../scripts/random-refresh';
+</script>
+
+<script is:inline>
+  (() => {
+    const form = document.getElementById('search-form');
+    const input = document.getElementById('search-input');
+    if (!form || !input) return;
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const raw = (input.value || '').trim().toLowerCase();
+      if (!raw) return;
+      const slug = raw.replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      if (slug) window.location.href = '/tag/' + encodeURIComponent(slug);
+    });
+  })();
+</script>
+

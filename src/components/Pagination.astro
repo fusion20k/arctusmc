@@ -1,0 +1,69 @@
+---
+interface Props {
+  currentPage: number;
+  totalPages: number;
+  baseUrl: string;
+}
+
+const { currentPage, totalPages, baseUrl } = Astro.props;
+
+function pageUrl(page: number): string {
+  if (page === 1) return baseUrl;
+  const url = new URL(baseUrl, 'http://placeholder');
+  url.searchParams.set('page', String(page));
+  return url.pathname + url.search;
+}
+
+const delta = 2;
+const rangeStart = Math.max(1, currentPage - delta);
+const rangeEnd = Math.min(totalPages, currentPage + delta);
+const pages: number[] = [];
+for (let p = rangeStart; p <= rangeEnd; p++) {
+  pages.push(p);
+}
+
+const showFirst = rangeStart > 1;
+const showFirstEllipsis = rangeStart > 2;
+const showLast = rangeEnd < totalPages;
+const showLastEllipsis = rangeEnd < totalPages - 1;
+---
+{totalPages > 1 && (
+  <nav class="flex items-center justify-center gap-1.5 mt-10" aria-label="Pagination">
+    {currentPage > 1 && (
+      <a href={pageUrl(currentPage - 1)} class="pagination-btn" aria-label="Previous page">
+        &larr;
+      </a>
+    )}
+
+    {showFirst && (
+      <a href={pageUrl(1)} class="pagination-btn">1</a>
+    )}
+    {showFirstEllipsis && (
+      <span class="px-1 text-zinc-600 select-none">&hellip;</span>
+    )}
+
+    {pages.map((page) => (
+      <a
+        href={pageUrl(page)}
+        class:list={['pagination-btn', { 'pagination-btn-active': page === currentPage }]}
+        aria-current={page === currentPage ? 'page' : undefined}
+        aria-label={page === currentPage ? `Page ${page}, current` : `Page ${page}`}
+      >
+        {page}
+      </a>
+    ))}
+
+    {showLastEllipsis && (
+      <span class="px-1 text-zinc-600 select-none">&hellip;</span>
+    )}
+    {showLast && (
+      <a href={pageUrl(totalPages)} class="pagination-btn">{totalPages}</a>
+    )}
+
+    {currentPage < totalPages && (
+      <a href={pageUrl(currentPage + 1)} class="pagination-btn" aria-label="Next page">
+        &rarr;
+      </a>
+    )}
+  </nav>
+)}

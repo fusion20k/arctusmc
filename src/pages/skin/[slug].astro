@@ -1,0 +1,136 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import SkinViewer from '../../components/SkinViewer.astro';
+import { getSkinBySlug } from '../../lib/db/queries';
+import { canonicalUrl, avatarUrl, getSiteUrl } from '../../lib/seo';
+
+const { slug } = Astro.params as { slug: string };
+const skin = await getSkinBySlug(slug);
+
+if (!skin) {
+  return Astro.redirect('/404', 404);
+}
+
+const displayName = skin.display_name ?? skin.source_username ?? skin.slug;
+const skinCanonical = canonicalUrl(`/skin/${skin.slug}`);
+const ogImage = avatarUrl(skin.slug);
+const addedDate = new Date(skin.created_at).toISOString();
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ImageObject',
+  name: `${displayName} Minecraft Skin`,
+  description: skin.description,
+  contentUrl: `${getSiteUrl()}/api/texture/${skin.slug}.png`,
+  thumbnailUrl: ogImage,
+  url: skinCanonical,
+  datePublished: addedDate,
+  keywords: skin.tags.map((t) => t.name).join(', '),
+};
+
+const colorTags = skin.tags.filter((t) => t.type === 'color');
+const modelTags = skin.tags.filter((t) => t.type === 'model');
+---
+<BaseLayout
+  title={`${displayName} Minecraft Skin`}
+  description={skin.description}
+  canonical={skinCanonical}
+  ogImage={ogImage}
+  jsonLd={jsonLd}
+>
+  <div class="container-content py-8">
+
+    <div class="flex items-center justify-between gap-4 mb-6">
+      <nav class="text-sm text-frost-500" aria-label="Breadcrumb">
+        <ol class="flex items-center gap-1.5">
+          <li><a href="/" class="hover:text-frost-300 transition-colors">Home</a></li>
+          <li aria-hidden="true">/</li>
+          <li class="text-frost-300 truncate max-w-xs capitalize">{skin.model} skin</li>
+        </ol>
+      </nav>
+      <button
+        id="back-btn"
+        type="button"
+        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-frost-900/60 border border-frost-700/70 text-frost-200 text-sm font-medium hover:bg-frost-800 hover:border-frost-600 backdrop-blur-md transition-colors"
+        aria-label="Go back"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back
+      </button>
+    </div>
+
+    <script is:inline>
+      (() => {
+        const btn = document.getElementById('back-btn');
+        if (!btn) return;
+        btn.addEventListener('click', () => {
+          if (window.history.length > 1) window.history.back();
+          else window.location.href = '/';
+        });
+      })();
+    </script>
+
+    <div class="flex flex-col lg:flex-row gap-8">
+
+      <aside class="flex flex-col items-center gap-6 lg:w-80 shrink-0">
+        <div class="card-frost overflow-hidden">
+          <SkinViewer slug={skin.slug} width={300} height={400} />
+        </div>
+
+        <div class="flex gap-3 w-full justify-center">
+          <a
+            href={`/api/texture/${skin.slug}.png`}
+            download={`${skin.slug}.png`}
+            class="flex-1 max-w-[160px] inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-brand-500 hover:bg-brand-400 text-frost-950 text-sm font-semibold transition-colors duration-150"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download
+          </a>
+        </div>
+
+        <div class="w-full">
+          <AdSlot adSlot="skin-sidebar" format="rectangle" label="Sidebar Advertisement" />
+        </div>
+      </aside>
+
+      <div class="flex-1 min-w-0">
+
+        <div class="mb-6">
+          <h1 class="text-2xl font-bold text-frost-50 mb-1 capitalize">
+            {skin.model} Minecraft Skin
+          </h1>
+        </div>
+
+        {skin.tags.length > 0 && (
+          <div class="mb-6">
+            <h2 class="text-sm font-semibold text-frost-400 uppercase tracking-wider mb-3">Tags</h2>
+            <div class="flex flex-wrap gap-2">
+              {modelTags.map((tag) => (
+                <a href={`/tag/${tag.slug}`} class="tag tag-model hover:no-underline">{tag.name}</a>
+              ))}
+              {colorTags.map((tag) => (
+                <a href={`/tag/${tag.slug}`} class="tag tag-color hover:no-underline">{tag.name}</a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div class="card-frost p-5 mb-6">
+          <dl class="text-sm">
+            <div>
+              <dt class="text-frost-500">Model</dt>
+              <dd class="text-frost-200 capitalize mt-0.5">{skin.model}</dd>
+            </div>
+          </dl>
+        </div>
+
+        <div>
+          <AdSlot adSlot="skin-content" format="horizontal" label="Content Advertisement" />
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</BaseLayout>

@@ -1,0 +1,41 @@
+---
+import type { SkinCardData } from '../lib/db/queries';
+
+interface Props {
+  skin: SkinCardData;
+}
+
+const { skin } = Astro.props;
+const displayName = skin.display_name ?? skin.source_username ?? skin.slug;
+const avatarSrc = `/api/avatar/${skin.slug}.png?v=7`;
+---
+<a
+  href={`/skin/${skin.slug}`}
+  class="group flex flex-col card-frost overflow-hidden
+         hover:border-brand-500/60 hover:bg-frost-800/70 transition-all duration-150
+         focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-400"
+>
+  <div class="aspect-square skin-checker flex items-center justify-center p-3">
+    <img
+      src={avatarSrc}
+      alt={`${displayName} Minecraft skin avatar`}
+      width="160"
+      height="320"
+      loading="lazy"
+      decoding="async"
+      class="w-full h-full object-contain pixelated drop-shadow-[0_4px_12px_rgba(0,0,0,0.45)]"
+    />
+  </div>
+  <div class="p-3 flex flex-col gap-1.5 flex-1">
+    <p class="text-xs text-frost-400 capitalize">{skin.model}</p>
+    {skin.tags.length > 0 && (
+      <div class="flex flex-wrap gap-1 mt-0.5">
+        {skin.tags.slice(0, 3).map((tag) => (
+          <span class:list={['tag', { 'tag-model': tag.type === 'model', 'tag-color': tag.type === 'color' }]}>
+            {tag.name}
+          </span>
+        ))}
+      </div>
+    )}
+  </div>
+</a>

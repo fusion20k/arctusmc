@@ -1,0 +1,123 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout
+  title="Ad Preferences — Skinora"
+  description="Manage your advertising preferences and opt out of personalized ads on Skinora."
+  noindex={true}
+>
+  <div class="container-content py-16 max-w-2xl mx-auto">
+    <h1 class="text-3xl font-bold text-zinc-100 mb-6">Ad Preferences</h1>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold text-zinc-200 mb-3">About Advertising on Skinora</h2>
+      <p class="text-zinc-400 leading-relaxed">
+        Skinora is supported by advertising. We display ads served by Google AdSense and
+        potentially other ad networks. These networks may use cookies and similar technologies
+        to show you ads that are relevant to your interests, based on your browsing activity
+        across this and other websites.
+      </p>
+    </section>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold text-zinc-200 mb-3">Personalized vs. Non-Personalized Ads</h2>
+      <p class="text-zinc-400 leading-relaxed mb-4">
+        By default, ad networks may serve <strong class="text-zinc-300">personalized ads</strong>{' '}
+        tailored to your inferred interests. You can opt out of personalized advertising at any
+        time using the links below. You will still see ads, but they will not be based on your
+        browsing history.
+      </p>
+    </section>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold text-zinc-200 mb-3">Opt-Out Options</h2>
+      <ul class="space-y-4">
+        <li class="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+          <p class="font-medium text-zinc-200 mb-1">Google Ads Settings</p>
+          <p class="text-sm text-zinc-400 mb-3">
+            Opt out of personalized Google ads and manage your Google ad preferences across all
+            sites and apps.
+          </p>
+          <a
+            href="https://www.google.com/settings/ads"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-block rounded bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600 transition-colors duration-150"
+          >
+            Manage Google Ad Settings &rarr;
+          </a>
+        </li>
+
+        <li class="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+          <p class="font-medium text-zinc-200 mb-1">NAI Opt-Out Tool</p>
+          <p class="text-sm text-zinc-400 mb-3">
+            The Network Advertising Initiative offers a centralized opt-out tool for member
+            ad networks.
+          </p>
+          <a
+            href="https://optout.networkadvertising.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-block rounded bg-zinc-700 px-4 py-2 text-sm font-medium text-zinc-100 hover:bg-zinc-600 transition-colors duration-150"
+          >
+            NAI Opt-Out Tool &rarr;
+          </a>
+        </li>
+
+        <li class="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+          <p class="font-medium text-zinc-200 mb-1">DAA Opt-Out (US)</p>
+          <p class="text-sm text-zinc-400 mb-3">
+            The Digital Advertising Alliance provides an opt-out mechanism for interest-based
+            advertising in the United States.
+          </p>
+          <a
+            href="https://optout.aboutads.info/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-block rounded bg-zinc-700 px-4 py-2 text-sm font-medium text-zinc-100 hover:bg-zinc-600 transition-colors duration-150"
+          >
+            DAA Opt-Out &rarr;
+          </a>
+        </li>
+
+        <li class="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+          <p class="font-medium text-zinc-200 mb-1">EDAA Opt-Out (Europe)</p>
+          <p class="text-sm text-zinc-400 mb-3">
+            European users can manage interest-based advertising preferences through the
+            European Interactive Digital Advertising Alliance.
+          </p>
+          <a
+            href="https://www.youronlinechoices.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-block rounded bg-zinc-700 px-4 py-2 text-sm font-medium text-zinc-100 hover:bg-zinc-600 transition-colors duration-150"
+          >
+            Your Online Choices &rarr;
+          </a>
+        </li>
+      </ul>
+    </section>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold text-zinc-200 mb-3">Browser-Level Controls</h2>
+      <p class="text-zinc-400 leading-relaxed">
+        You can also limit ad tracking through your browser or device settings. Most modern
+        browsers allow you to block third-party cookies or enable a &ldquo;Do Not Track&rdquo;
+        signal. Refer to your browser&rsquo;s help documentation for instructions.
+      </p>
+    </section>
+
+    <section>
+      <h2 class="text-xl font-semibold text-zinc-200 mb-3">Questions</h2>
+      <p class="text-zinc-400 leading-relaxed">
+        If you have questions about how advertising works on this site, please{' '}
+        <a
+          href="/contact"
+          class="text-emerald-400 hover:text-emerald-300 transition-colors duration-150"
+        >
+          contact us
+        </a>.
+      </p>
+    </section>
+  </div>
+</BaseLayout>

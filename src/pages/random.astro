@@ -1,0 +1,83 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SkinGrid from '../components/SkinGrid.astro';
+import { getRandomSkins } from '../lib/db/queries';
+import { canonicalUrl } from '../lib/seo';
+
+const skins = await getRandomSkins(24);
+---
+<BaseLayout
+  title="Random Skins"
+  description="Discover random Minecraft skins. Hit refresh to load a brand new set of unique player skins."
+  canonical={canonicalUrl('/random')}
+  noindex={true}
+>
+  <div class="container-content py-8">
+
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-frost-50">Random Skins</h1>
+      <p class="text-frost-400 text-sm mt-1">A fresh selection every time you refresh.</p>
+    </div>
+
+    <div class="flex justify-end mb-6">
+      <button
+        class="js-refresh-btn inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+        aria-label="Load new random skins"
+      >
+        <svg
+          class="js-refresh-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <polyline points="23 4 23 10 17 10"/>
+          <polyline points="1 20 1 14 7 14"/>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+        Refresh
+      </button>
+    </div>
+
+    <div id="skin-grid-container">
+      <SkinGrid skins={skins} adFrequency={12} />
+    </div>
+
+    <div class="flex justify-end mt-8 mb-6">
+      <button
+        class="js-refresh-btn inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+        aria-label="Load new random skins"
+      >
+        <svg
+          class="js-refresh-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <polyline points="23 4 23 10 17 10"/>
+          <polyline points="1 20 1 14 7 14"/>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+        Refresh
+      </button>
+    </div>
+
+  </div>
+</BaseLayout>
+
+<script>
+  import '../scripts/random-refresh';
+</script>

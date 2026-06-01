@@ -1,0 +1,53 @@
+---
+const pathname = Astro.url.pathname;
+---
+<header class="sticky top-0 z-50 border-b border-white/5 bg-[rgba(3,6,15,0.55)] backdrop-blur-xl">
+  <div class="container-content">
+    <div class="flex h-14 items-center justify-between gap-4">
+      <a
+        href="/"
+        class="flex items-center gap-2 text-lg font-bold tracking-wide text-frost-50 hover:text-brand-300 transition-colors duration-150"
+        aria-label="Arctus MC home"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="text-brand-300"
+          aria-hidden="true"
+        >
+          <line x1="12" y1="2" x2="12" y2="22" />
+          <line x1="2" y1="12" x2="22" y2="12" />
+          <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+          <line x1="19.07" y1="4.93" x2="4.93" y2="19.07" />
+          <polyline points="9 5 12 2 15 5" />
+          <polyline points="9 19 12 22 15 19" />
+          <polyline points="5 9 2 12 5 15" />
+          <polyline points="19 9 22 12 19 15" />
+        </svg>
+        Arctus MC
+      </a>
+
+      <nav class="flex items-center gap-1 sm:gap-2" aria-label="Main navigation">
+        <a
+          href="/"
+          class:list={['nav-link px-3 py-1.5 rounded', { 'nav-link-active bg-frost-800/70': pathname === '/' }]}
+        >
+          Home
+        </a>
+        <a
+          href="/random"
+          class:list={['nav-link px-3 py-1.5 rounded', { 'nav-link-active bg-frost-800/70': pathname === '/random' }]}
+        >
+          Random
+        </a>
+      </nav>
+    </div>
+  </div>
+</header>

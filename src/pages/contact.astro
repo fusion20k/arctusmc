@@ -1,0 +1,62 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout
+  title="Contact — Skinora"
+  description="Contact Skinora for general inquiries, copyright concerns, or takedown requests."
+  noindex={true}
+>
+  <div class="container-content py-16 max-w-2xl mx-auto">
+    <h1 class="text-3xl font-bold text-zinc-100 mb-6">Contact</h1>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold text-zinc-200 mb-3">General Inquiries</h2>
+      <p class="text-zinc-400 leading-relaxed">
+        For general questions or feedback about Skinora, please email us at{' '}
+        <a
+          href="mailto:contact@example.com"
+          class="text-emerald-400 hover:text-emerald-300 transition-colors duration-150"
+        >
+          contact@example.com
+        </a>.
+      </p>
+    </section>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold text-zinc-200 mb-3">Takedown &amp; Copyright Requests</h2>
+      <p class="text-zinc-400 leading-relaxed mb-4">
+        Skinora displays Minecraft skin textures that are publicly accessible via the Mojang API.
+        If you believe a skin infringes your rights or you wish to have content associated with
+        your account removed, please contact us at{' '}
+        <a
+          href="mailto:contact@example.com"
+          class="text-emerald-400 hover:text-emerald-300 transition-colors duration-150"
+        >
+          contact@example.com
+        </a>{' '}
+        with the subject line <strong class="text-zinc-300">Takedown Request</strong>.
+      </p>
+      <p class="text-zinc-400 leading-relaxed mb-4">
+        Please include the following in your request:
+      </p>
+      <ul class="list-disc list-inside text-zinc-400 space-y-2 pl-2">
+        <li>Your name and contact information.</li>
+        <li>The Minecraft username or UUID associated with the skin.</li>
+        <li>The URL of the skin page on Skinora you wish to have removed.</li>
+        <li>A brief description of your request and the basis for it.</li>
+      </ul>
+      <p class="text-zinc-400 leading-relaxed mt-4">
+        We will review all requests promptly and remove content where appropriate, typically
+        within 5 business days.
+      </p>
+    </section>
+
+    <section>
+      <h2 class="text-xl font-semibold text-zinc-200 mb-3">Disclaimer</h2>
+      <p class="text-zinc-400 leading-relaxed">
+        Skinora is not affiliated with, endorsed by, or in any way officially connected with
+        Mojang Studios or Microsoft Corporation. Minecraft is a trademark of Mojang Studios.
+      </p>
+    </section>
+  </div>
+</BaseLayout>

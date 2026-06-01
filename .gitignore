@@ -1,0 +1,33 @@
+node_modules/
+.astro/
+dist/
+.netlify/
+.vercel/
+
+# build/output
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# env
+.env
+.env.*
+!.env.example
+
+# local DB
+local.db
+local.db-*
+*.sqlite
+*.sqlite-*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# editor
+.vscode/
+.idea/
+
+# logs / temp
+homepage.html
