@@ -2,8 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SkinGrid from '../../components/SkinGrid.astro';
 import Pagination from '../../components/Pagination.astro';
-import AdSlot from '../../components/AdSlot.astro';
-import { getSkinsByTag } from '../../lib/db/queries';
+import { getSkinsByTag, getRandomSkins } from '../../lib/db/queries';
 import { canonicalUrl } from '../../lib/seo';
 
 const { tag: tagSlug } = Astro.params as { tag: string };
@@ -13,61 +12,86 @@ const perPage = 24;
 
 const { items, total, tag } = await getSkinsByTag(tagSlug, currentPage, perPage);
 
-if (!tag) {
-  return Astro.redirect('/404', 404);
-}
+const prettyQuery = tagSlug
+  .replace(/[-_]+/g, ' ')
+  .replace(/\b\w/g, (c) => c.toUpperCase());
 
-const totalPages = Math.max(1, Math.ceil(total / perPage));
+const hasResults = !!tag && items.length > 0;
+const totalPages = hasResults ? Math.max(1, Math.ceil(total / perPage)) : 1;
 const tagCanonical = canonicalUrl(`/tag/${tagSlug}`);
 
-const title = `${tag.name} Minecraft Skins`;
-const description = `Browse ${total} Minecraft skins tagged with ${tag.name}. Explore ${tag.type === 'model' ? `${tag.name} model` : tag.name} skins and find your perfect Minecraft skin.`;
+const heading = tag ? tag.name : prettyQuery;
+const title = hasResults
+  ? `${heading} Minecraft Skins`
+  : `No results for "${heading}" — Arctus MC`;
+const description = hasResults
+  ? `Browse ${total} Minecraft skins tagged with ${heading}. Find your perfect Minecraft skin.`
+  : `No Minecraft skins matched "${heading}". Try a different color, style, or browse random skins on Arctus MC.`;
+
+const fallbackSkins = hasResults ? [] : await getRandomSkins(18);
 ---
 <BaseLayout
   title={title}
   description={description}
   canonical={tagCanonical}
+  noindex={!hasResults}
 >
   <div class="container-content py-8">
 
-    <nav class="text-sm text-zinc-500 mb-6" aria-label="Breadcrumb">
+    <nav class="text-sm text-frost-500 mb-6" aria-label="Breadcrumb">
       <ol class="flex items-center gap-1.5">
-        <li><a href="/" class="hover:text-zinc-300 transition-colors">Home</a></li>
+        <li><a href="/" class="hover:text-frost-300 transition-colors">Home</a></li>
         <li aria-hidden="true">/</li>
-        <li class="text-zinc-300">{tag.name}</li>
+        <li class="text-frost-300 capitalize">{heading}</li>
       </ol>
     </nav>
 
-    <div class="mb-8">
-      <div class="flex items-center gap-3 mb-2">
-        <h1 class="text-2xl font-bold text-zinc-100">{tag.name} Skins</h1>
-        <span class="tag capitalize">{tag.type}</span>
-      </div>
-      <p class="text-zinc-500 text-sm">
-        {total.toLocaleString()} {total === 1 ? 'skin' : 'skins'} tagged with <strong class="text-zinc-400">{tag.name}</strong>
-        {totalPages > 1 && ` — page ${currentPage} of ${totalPages}`}
-      </p>
-    </div>
-
-    <div class="mb-6">
-      <AdSlot adSlot="tag-top" format="horizontal" label="Top Banner Advertisement" />
-    </div>
-
-    {items.length > 0 ? (
+    {hasResults ? (
       <>
+        <div class="mb-8">
+          <div class="flex items-center gap-3 mb-2">
+            <h1 class="text-2xl font-bold text-frost-100">{heading} Skins</h1>
+            <span class="tag capitalize">{tag!.type}</span>
+          </div>
+          <p class="text-frost-500 text-sm">
+            {total.toLocaleString()} {total === 1 ? 'skin' : 'skins'} tagged with <strong class="text-frost-300">{heading}</strong>
+            {totalPages > 1 && ` — page ${currentPage} of ${totalPages}`}
+          </p>
+        </div>
+
         <SkinGrid skins={items} adFrequency={12} />
         <Pagination currentPage={currentPage} totalPages={totalPages} baseUrl={`/tag/${tagSlug}`} />
       </>
     ) : (
-      <div class="flex flex-col items-center justify-center py-20 text-zinc-500">
-        <p class="text-base font-medium">No skins found for this tag.</p>
-        <a href="/" class="mt-4 text-sm text-brand-400 hover:text-brand-300 transition-colors">Browse all skins →</a>
-      </div>
-    )}
+      <>
+        <div class="card-frost p-8 mb-10 text-center">
+          <h1 class="text-2xl sm:text-3xl font-bold text-frost-100 mb-2">
+            No skins matched &ldquo;{heading}&rdquo;
+          </h1>
+          <p class="text-frost-400 text-sm sm:text-base max-w-xl mx-auto">
+            We couldn&apos;t find any skins for that search. Try a color (blue, red, black),
+            a style (slim, classic), or hit the button below for a random pick.
+          </p>
+          <div class="mt-6 flex items-center justify-center gap-3">
+            <a
+              href="/random"
+              class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-brand-500 hover:bg-brand-400 text-frost-950 text-sm font-semibold transition-colors"
+            >
+              Random skins
+            </a>
+            <a
+              href="/"
+              class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-frost-900/60 border border-frost-700/70 text-frost-200 text-sm font-medium hover:bg-frost-800 backdrop-blur-md transition-colors"
+            >
+              Back home
+            </a>
+          </div>
+        </div>
 
-    <div class="mt-8">
-      <AdSlot adSlot="tag-bottom" format="rectangle" label="Bottom Advertisement" />
-    </div>
+        <h2 class="section-heading">You might like these</h2>
+        <SkinGrid skins={fallbackSkins} adFrequency={12} />
+      </>
+    )}
 
   </div>
 </BaseLayout>
