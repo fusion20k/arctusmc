@@ -5,6 +5,7 @@ import { getRandomSkins } from '../lib/db/queries';
 import { canonicalUrl } from '../lib/seo';
 
 const skins = await getRandomSkins(24);
+const adsenseClient = import.meta.env.PUBLIC_ADSENSE_CLIENT;
 ---
 <BaseLayout
   title="Random Skins"
@@ -45,7 +46,7 @@ const skins = await getRandomSkins(24);
       </button>
     </div>
 
-    <div id="skin-grid-container">
+    <div id="skin-grid-container" data-ad-client={adsenseClient}>
       <SkinGrid skins={skins} adFrequency={12} />
     </div>
 

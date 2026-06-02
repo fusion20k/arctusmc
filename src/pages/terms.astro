@@ -1,0 +1,96 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { canonicalUrl } from '../lib/seo';
+const lastUpdated = '2025-01-01';
+---
+<BaseLayout
+  title="Terms of Service — Arctus MC"
+  description="Terms of Service governing your use of Arctus MC."
+  canonical={canonicalUrl('/terms')}
+>
+  <div class="container-content py-16 max-w-2xl mx-auto">
+    <h1 class="text-3xl font-bold text-frost-100 mb-2">Terms of Service</h1>
+    <p class="text-sm text-frost-500 mb-10">Last updated: {lastUpdated}</p>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold text-frost-200 mb-3">Acceptance of Terms</h2>
+      <p class="text-frost-400 leading-relaxed">
+        By accessing or using Arctus MC (&ldquo;the Site&rdquo;), you agree to be bound by these
+        Terms of Service. If you do not agree to these terms, do not use the Site.
+      </p>
+    </section>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold text-frost-200 mb-3">Use of the Site</h2>
+      <p class="text-frost-400 leading-relaxed mb-4">
+        Arctus MC provides a public archive of Minecraft skin previews for browsing and
+        discovery. You agree to use the Site only for lawful purposes and in a way that does
+        not infringe the rights of, restrict, or inhibit anyone else&rsquo;s use of the Site.
+      </p>
+      <p class="text-frost-400 leading-relaxed">
+        You agree not to:
+      </p>
+      <ul class="list-disc list-inside text-frost-400 space-y-2 pl-2 mt-3">
+        <li>Scrape, crawl, or otherwise harvest data at a rate that disrupts service.</li>
+        <li>Attempt to gain unauthorized access to any portion of the Site or its systems.</li>
+        <li>Use the Site to distribute malware or engage in any malicious activity.</li>
+        <li>Interfere with or circumvent advertising displayed on the Site.</li>
+      </ul>
+    </section>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold text-frost-200 mb-3">Intellectual Property</h2>
+      <p class="text-frost-400 leading-relaxed">
+        Skin textures and usernames displayed on Arctus MC are sourced from the publicly
+        accessible Mojang API and remain the property of their respective owners. The Site
+        layout, branding, and original content are the property of Arctus MC. Minecraft is a
+        trademark of Mojang Studios; Arctus MC is not affiliated with Mojang or Microsoft.
+      </p>
+    </section>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold text-frost-200 mb-3">Advertising</h2>
+      <p class="text-frost-400 leading-relaxed">
+        Arctus MC is supported by advertising served by Google AdSense and other partners.
+        We do not control the content of third-party ads and are not responsible for them.
+        See our <a href="/privacy" class="text-brand-300 hover:text-brand-200">Privacy Policy</a>
+        and <a href="/ad-preferences" class="text-brand-300 hover:text-brand-200">Ad Preferences</a>
+        for details.
+      </p>
+    </section>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold text-frost-200 mb-3">Disclaimer of Warranties</h2>
+      <p class="text-frost-400 leading-relaxed">
+        The Site is provided &ldquo;as is&rdquo; without warranties of any kind, either
+        express or implied. We do not warrant that the Site will be uninterrupted, error-free,
+        or free of harmful components.
+      </p>
+    </section>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold text-frost-200 mb-3">Limitation of Liability</h2>
+      <p class="text-frost-400 leading-relaxed">
+        To the maximum extent permitted by law, Arctus MC shall not be liable for any
+        indirect, incidental, special, consequential, or punitive damages arising from your
+        use of, or inability to use, the Site.
+      </p>
+    </section>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold text-frost-200 mb-3">Changes to These Terms</h2>
+      <p class="text-frost-400 leading-relaxed">
+        We may revise these Terms at any time. Continued use of the Site after changes
+        constitutes acceptance of the updated Terms.
+      </p>
+    </section>
+
+    <section>
+      <h2 class="text-xl font-semibold text-frost-200 mb-3">Governing Law</h2>
+      <p class="text-frost-400 leading-relaxed">
+        These Terms are governed by applicable law in the jurisdiction in which the Site
+        operator resides, without regard to conflict-of-law principles.
+      </p>
+    </section>
+  </div>
+</BaseLayout>

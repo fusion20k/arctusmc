@@ -10,6 +10,7 @@ const [skins, allTags] = await Promise.all([
 ]);
 
 const topTags = allTags.slice(0, 16);
+const adsenseClient = import.meta.env.PUBLIC_ADSENSE_CLIENT;
 ---
 <BaseLayout
   title={SITE_NAME}
@@ -95,7 +96,7 @@ const topTags = allTags.slice(0, 16);
           <a href="/random" class="text-sm text-brand-300 hover:text-brand-200 transition-colors">See all →</a>
         </div>
       </div>
-      <div id="skin-grid-container">
+      <div id="skin-grid-container" data-ad-client={adsenseClient}>
         <SkinGrid skins={skins} adFrequency={12} />
       </div>
     </section>

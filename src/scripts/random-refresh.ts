@@ -8,8 +8,14 @@ interface SkinCardData {
 const buttons = document.querySelectorAll<HTMLButtonElement>('.js-refresh-btn');
 const icons = document.querySelectorAll<SVGElement>('.js-refresh-icon');
 const container = document.getElementById('skin-grid-container');
+const adsenseClient = container?.dataset.adClient || '';
 
 const AD_FREQUENCY = 12;
+
+interface AdWindow extends Window {
+  adsbygoogle?: unknown[];
+}
+const adWindow = window as AdWindow;
 
 const setBusy = (busy: boolean) => {
   buttons.forEach((b) => (b.disabled = busy));
@@ -55,12 +61,38 @@ const buildCard = (skin: SkinCardData): HTMLAnchorElement => {
 const buildInlineAd = (): HTMLDivElement => {
   const wrap = document.createElement('div');
   wrap.className = 'col-span-full';
-  wrap.innerHTML = `
-    <div class="w-full overflow-hidden">
-      <div class="ad-placeholder"><span>Advertisement</span></div>
-    </div>
-  `;
+  if (adsenseClient) {
+    const ins = document.createElement('ins');
+    ins.className = 'adsbygoogle block';
+    ins.style.display = 'block';
+    ins.setAttribute('data-ad-client', adsenseClient);
+    ins.setAttribute('data-ad-slot', 'grid-inline');
+    ins.setAttribute('data-ad-format', 'horizontal');
+    ins.setAttribute('data-full-width-responsive', 'true');
+    const inner = document.createElement('div');
+    inner.className = 'w-full overflow-hidden';
+    inner.appendChild(ins);
+    wrap.appendChild(inner);
+  } else {
+    wrap.innerHTML = `
+      <div class="w-full overflow-hidden">
+        <div class="ad-placeholder"><span>Advertisement</span></div>
+      </div>
+    `;
+  }
   return wrap;
+};
+
+const pushAds = (count: number) => {
+  if (!adsenseClient) return;
+  adWindow.adsbygoogle = adWindow.adsbygoogle || [];
+  for (let i = 0; i < count; i++) {
+    try {
+      adWindow.adsbygoogle.push({});
+    } catch {
+      /* ignore */
+    }
+  }
 };
 
 const handleClick = async () => {
@@ -78,15 +110,18 @@ const handleClick = async () => {
     grid.className =
       'grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 sm:gap-4';
 
+    let adCount = 0;
     data.skins.forEach((skin, i) => {
       if (i > 0 && i % AD_FREQUENCY === 0) {
         grid.appendChild(buildInlineAd());
+        adCount++;
       }
       grid.appendChild(buildCard(skin));
     });
 
     container.innerHTML = '';
     container.appendChild(grid);
+    pushAds(adCount);
   } catch {
     window.location.reload();
   } finally {

@@ -1,0 +1,86 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { canonicalUrl } from '../lib/seo';
+const lastUpdated = '2025-01-01';
+---
+<BaseLayout
+  title="Cookie Policy — Arctus MC"
+  description="How Arctus MC uses cookies and similar tracking technologies."
+  canonical={canonicalUrl('/cookies')}
+>
+  <div class="container-content py-16 max-w-2xl mx-auto">
+    <h1 class="text-3xl font-bold text-frost-100 mb-2">Cookie Policy</h1>
+    <p class="text-sm text-frost-500 mb-10">Last updated: {lastUpdated}</p>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold text-frost-200 mb-3">What Are Cookies?</h2>
+      <p class="text-frost-400 leading-relaxed">
+        Cookies are small text files placed on your device when you visit a website. They are
+        widely used to make websites work, improve user experience, and provide reporting and
+        advertising functionality.
+      </p>
+    </section>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold text-frost-200 mb-3">How We Use Cookies</h2>
+      <p class="text-frost-400 leading-relaxed mb-4">
+        Arctus MC uses cookies and similar technologies for the following purposes:
+      </p>
+      <ul class="list-disc list-inside text-frost-400 space-y-2 pl-2">
+        <li><strong class="text-frost-300">Essential cookies</strong> &mdash; required for the
+          Site to function (e.g. preference storage).</li>
+        <li><strong class="text-frost-300">Analytics cookies</strong> &mdash; help us understand
+          how visitors use the Site so we can improve it.</li>
+        <li><strong class="text-frost-300">Advertising cookies</strong> &mdash; set by Google
+          AdSense and other ad partners to deliver and measure ads, including personalized
+          ads where permitted.</li>
+      </ul>
+    </section>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold text-frost-200 mb-3">Third-Party Cookies</h2>
+      <p class="text-frost-400 leading-relaxed">
+        Some cookies on Arctus MC are set by third parties such as Google. Their use of these
+        cookies is governed by their own privacy policies. For more information, see{' '}
+        <a
+          href="https://policies.google.com/technologies/cookies"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-brand-300 hover:text-brand-200"
+        >
+          Google&rsquo;s cookie policy
+        </a>.
+      </p>
+    </section>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold text-frost-200 mb-3">Managing Cookies</h2>
+      <p class="text-frost-400 leading-relaxed mb-4">
+        Most browsers allow you to control cookies through their settings. You can also opt
+        out of personalized advertising via our{' '}
+        <a href="/ad-preferences" class="text-brand-300 hover:text-brand-200">
+          Ad Preferences
+        </a> page or directly through{' '}
+        <a
+          href="https://www.google.com/settings/ads"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-brand-300 hover:text-brand-200"
+        >
+          Google Ads Settings
+        </a>.
+      </p>
+      <p class="text-frost-400 leading-relaxed">
+        Disabling cookies may affect functionality on the Site.
+      </p>
+    </section>
+
+    <section>
+      <h2 class="text-xl font-semibold text-frost-200 mb-3">Changes to This Policy</h2>
+      <p class="text-frost-400 leading-relaxed">
+        We may update this Cookie Policy from time to time. Material changes will be reflected
+        by an updated &ldquo;last updated&rdquo; date.
+      </p>
+    </section>
+  </div>
+</BaseLayout>

@@ -1,0 +1,63 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { canonicalUrl } from '../lib/seo';
+const lastUpdated = '2025-01-01';
+---
+<BaseLayout
+  title="Disclaimer — Arctus MC"
+  description="Disclaimer covering accuracy of content, trademarks, and third-party links on Arctus MC."
+  canonical={canonicalUrl('/disclaimer')}
+>
+  <div class="container-content py-16 max-w-2xl mx-auto">
+    <h1 class="text-3xl font-bold text-frost-100 mb-2">Disclaimer</h1>
+    <p class="text-sm text-frost-500 mb-10">Last updated: {lastUpdated}</p>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold text-frost-200 mb-3">No Affiliation</h2>
+      <p class="text-frost-400 leading-relaxed">
+        Arctus MC is an independent, fan-made archive and is <strong class="text-frost-300">not
+        affiliated with, endorsed by, or in any way officially connected with Mojang Studios,
+        Microsoft Corporation</strong>, or any of their subsidiaries or affiliates. Minecraft is
+        a trademark of Mojang Studios. All product and company names are the registered
+        trademarks of their original owners.
+      </p>
+    </section>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold text-frost-200 mb-3">Content Accuracy</h2>
+      <p class="text-frost-400 leading-relaxed">
+        Skin previews and metadata on Arctus MC are aggregated from the publicly accessible
+        Mojang API and other public sources. We make no warranty as to the accuracy,
+        completeness, or timeliness of any information presented. Skin textures and player
+        usernames may change at any time.
+      </p>
+    </section>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold text-frost-200 mb-3">External Links</h2>
+      <p class="text-frost-400 leading-relaxed">
+        The Site may contain links to third-party websites. We are not responsible for the
+        content, accuracy, or practices of any linked sites, and inclusion of any link does
+        not imply endorsement.
+      </p>
+    </section>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold text-frost-200 mb-3">Advertising</h2>
+      <p class="text-frost-400 leading-relaxed">
+        Ads displayed on Arctus MC are served by third-party ad networks including Google
+        AdSense. We do not control the specific advertisements shown and do not endorse any
+        advertised product or service.
+      </p>
+    </section>
+
+    <section>
+      <h2 class="text-xl font-semibold text-frost-200 mb-3">Takedown Requests</h2>
+      <p class="text-frost-400 leading-relaxed">
+        If you believe content on Arctus MC infringes your rights or you would like a skin
+        associated with your account removed, please submit a takedown request and we will
+        review it promptly.
+      </p>
+    </section>
+  </div>
+</BaseLayout>
