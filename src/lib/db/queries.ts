@@ -1,4 +1,4 @@
-import { eq, sql, desc, asc, count, inArray } from "drizzle-orm";
+import { eq, sql, desc, asc, count, inArray, or, like } from "drizzle-orm";
 import { db } from "./client";
 import { skins, tags, skinTags } from "./schema";
 
@@ -240,6 +240,181 @@ export async function getSkinsByTag(
     total,
     tag: { slug: tag.slug, name: tag.name, type: tag.type, count: total },
   };
+}
+
+// Simple synonym map: when a user searches one term, also try these.
+// Keep small and obvious — false positives are worse than misses.
+const SEARCH_SYNONYMS: Record<string, string[]> = {
+  slime: ["green"],
+  grass: ["green"],
+  frog: ["green"],
+  zombie: ["green"],
+  creeper: ["green"],
+  lava: ["orange", "red"],
+  fire: ["orange", "red"],
+  water: ["blue"],
+  ocean: ["blue"],
+  sky: ["blue"],
+  ice: ["white", "blue"],
+  snow: ["white"],
+  ghost: ["white"],
+  shadow: ["black"],
+  night: ["black"],
+  dark: ["black"],
+  void: ["black"],
+  ender: ["black"],
+  gold: ["yellow"],
+  honey: ["yellow"],
+  sun: ["yellow"],
+  rose: ["red", "pink"],
+  blood: ["red"],
+  king: ["yellow"],
+  queen: ["pink"],
+  princess: ["pink"],
+  knight: ["gray", "white"],
+  steel: ["gray"],
+  iron: ["gray"],
+  stone: ["gray"],
+  diamond: ["blue"],
+  emerald: ["green"],
+  ruby: ["red"],
+  rainbow: ["colorful"],
+  girl: ["slim"],
+  female: ["slim"],
+  woman: ["slim"],
+  boy: ["classic"],
+  male: ["classic"],
+  man: ["classic"],
+};
+
+function normalizeQuery(raw: string): string {
+  return raw.trim().toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function tokensFor(raw: string): string[] {
+  const norm = normalizeQuery(raw);
+  if (!norm) return [];
+  const base = norm.split(/\s+/).filter((t) => t.length >= 2);
+  const expanded = new Set<string>(base);
+  for (const tok of base) {
+    const syns = SEARCH_SYNONYMS[tok];
+    if (syns) syns.forEach((s) => expanded.add(s));
+  }
+  return Array.from(expanded);
+}
+
+export async function searchSkins(
+  rawQuery: string,
+  page: number,
+  perPage: number,
+): Promise<{
+  items: SkinCardData[];
+  total: number;
+  matchedTags: TagSummary[];
+  query: string;
+}> {
+  const normalized = normalizeQuery(rawQuery);
+  const toks = tokensFor(rawQuery);
+
+  if (toks.length === 0) {
+    return { items: [], total: 0, matchedTags: [], query: normalized };
+  }
+
+  // Find all matching tags (slug LIKE %tok% OR name LIKE %tok% for any token).
+  const tagConds = toks.flatMap((t) => [
+    like(tags.slug, `%${t}%`),
+    like(sql`lower(${tags.name})`, `%${t}%`),
+  ]);
+  const tagMatches = await db
+    .select({ id: tags.id, slug: tags.slug, name: tags.name, type: tags.type })
+    .from(tags)
+    .where(or(...tagConds)!)
+    .limit(50);
+
+  const tagIds = tagMatches.map((t) => t.id);
+
+  // Collect candidate skin IDs from two sources:
+  // (a) skins linked to any matching tag
+  // (b) skins whose description/source_username/display_name match the raw phrase
+  //     or any single token (we OR everything together).
+  const skinTextConds = toks.flatMap((t) => [
+    like(sql`lower(${skins.description})`, `%${t}%`),
+    like(sql`lower(${skins.source_username})`, `%${t}%`),
+    like(sql`lower(${skins.display_name})`, `%${t}%`),
+    like(skins.slug, `%${t}%`),
+  ]);
+
+  const idSet = new Set<number>();
+
+  if (tagIds.length > 0) {
+    const tagSkinRows = await db
+      .select({ skin_id: skinTags.skin_id })
+      .from(skinTags)
+      .where(inArray(skinTags.tag_id, tagIds));
+    for (const r of tagSkinRows) idSet.add(r.skin_id);
+  }
+
+  if (skinTextConds.length > 0) {
+    const textRows = await db
+      .select({ id: skins.id })
+      .from(skins)
+      .where(or(...skinTextConds)!)
+      .limit(2000);
+    for (const r of textRows) idSet.add(r.id);
+  }
+
+  const allIds = Array.from(idSet);
+  const total = allIds.length;
+
+  if (total === 0) {
+    return {
+      items: [],
+      total: 0,
+      matchedTags: tagMatches.map((t) => ({
+        slug: t.slug, name: t.name, type: t.type, count: 0,
+      })),
+      query: normalized,
+    };
+  }
+
+  // Pull the page of skins, ordered by created_at desc for stability.
+  const pageRows = await db
+    .select({
+      id: skins.id,
+      slug: skins.slug,
+      display_name: skins.display_name,
+      source_username: skins.source_username,
+      model: skins.model,
+      description: skins.description,
+      created_at: skins.created_at,
+    })
+    .from(skins)
+    .where(inArray(skins.id, allIds))
+    .orderBy(desc(skins.created_at))
+    .limit(perPage)
+    .offset((page - 1) * perPage);
+
+  const tagRowsForSkins = await getTagsForSkinIds(pageRows.map((r) => r.id));
+  const items = toCardData(pageRows, tagRowsForSkins);
+
+  // Aggregate counts for matched tags (best-effort, single query).
+  let matchedTags: TagSummary[] = [];
+  if (tagIds.length > 0) {
+    const countRows = await db
+      .select({ tag_id: skinTags.tag_id, c: count() })
+      .from(skinTags)
+      .where(inArray(skinTags.tag_id, tagIds))
+      .groupBy(skinTags.tag_id);
+    const countMap = new Map(countRows.map((r) => [r.tag_id, r.c]));
+    matchedTags = tagMatches
+      .map((t) => ({
+        slug: t.slug, name: t.name, type: t.type, count: countMap.get(t.id) ?? 0,
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 12);
+  }
+
+  return { items, total, matchedTags, query: normalized };
 }
 
 export async function listTags(): Promise<TagSummary[]> {

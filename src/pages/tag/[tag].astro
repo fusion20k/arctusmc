@@ -2,7 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SkinGrid from '../../components/SkinGrid.astro';
 import Pagination from '../../components/Pagination.astro';
-import { getSkinsByTag, getRandomSkins } from '../../lib/db/queries';
+import { getSkinsByTag, searchSkins, getRandomSkins } from '../../lib/db/queries';
 import { canonicalUrl } from '../../lib/seo';
 
 const { tag: tagSlug } = Astro.params as { tag: string };
@@ -10,31 +10,56 @@ const pageParam = Astro.url.searchParams.get('page');
 const currentPage = Math.max(1, parseInt(pageParam ?? '1', 10));
 const perPage = 24;
 
-const { items, total, tag } = await getSkinsByTag(tagSlug, currentPage, perPage);
-
 const prettyQuery = tagSlug
   .replace(/[-_]+/g, ' ')
   .replace(/\b\w/g, (c) => c.toUpperCase());
 
-const hasResults = !!tag && items.length > 0;
-const totalPages = hasResults ? Math.max(1, Math.ceil(total / perPage)) : 1;
+// 1) Try exact tag match first (fast path).
+const exact = await getSkinsByTag(tagSlug, currentPage, perPage);
+
+// 2) Fuzzy search fallback when no exact tag or it has no skins.
+let mode: 'tag' | 'search' | 'empty' = 'tag';
+let items = exact.items;
+let total = exact.total;
+let matchedTags: { slug: string; name: string; type: string; count: number }[] = [];
+
+if (!exact.tag || exact.items.length === 0) {
+  const search = await searchSkins(tagSlug, currentPage, perPage);
+  if (search.total > 0) {
+    mode = 'search';
+    items = search.items;
+    total = search.total;
+    matchedTags = search.matchedTags;
+  } else {
+    mode = 'empty';
+    items = [];
+    total = 0;
+    matchedTags = search.matchedTags;
+  }
+}
+
+const totalPages = total > 0 ? Math.max(1, Math.ceil(total / perPage)) : 1;
 const tagCanonical = canonicalUrl(`/tag/${tagSlug}`);
 
-const heading = tag ? tag.name : prettyQuery;
-const title = hasResults
-  ? `${heading} Minecraft Skins`
-  : `No results for "${heading}" — Arctus MC`;
-const description = hasResults
-  ? `Browse ${total} Minecraft skins tagged with ${heading}. Find your perfect Minecraft skin.`
-  : `No Minecraft skins matched "${heading}". Try a different color, style, or browse random skins on Arctus MC.`;
+const heading = exact.tag ? exact.tag.name : prettyQuery;
+const isIndexable = mode === 'tag' && !!exact.tag;
 
-const fallbackSkins = hasResults ? [] : await getRandomSkins(18);
+const title =
+  mode === 'empty'
+    ? `No results for "${heading}" — Arctus MC`
+    : `${heading} Minecraft Skins`;
+const description =
+  mode === 'empty'
+    ? `No Minecraft skins matched "${heading}". Try a different color, style, or browse random skins on Arctus MC.`
+    : `Browse ${total} Minecraft skins matching ${heading}. Find your perfect Minecraft skin.`;
+
+const fallbackSkins = mode === 'empty' ? await getRandomSkins(18) : [];
 ---
 <BaseLayout
   title={title}
   description={description}
   canonical={tagCanonical}
-  noindex={!hasResults}
+  noindex={!isIndexable}
 >
   <div class="container-content py-8">
 
@@ -46,23 +71,43 @@ const fallbackSkins = hasResults ? [] : await getRandomSkins(18);
       </ol>
     </nav>
 
-    {hasResults ? (
+    {(mode === 'tag' || mode === 'search') && (
       <>
         <div class="mb-8">
-          <div class="flex items-center gap-3 mb-2">
-            <h1 class="text-2xl font-bold text-frost-100">{heading} Skins</h1>
-            <span class="tag capitalize">{tag!.type}</span>
+          <div class="flex items-center gap-3 mb-2 flex-wrap">
+            <h1 class="text-2xl font-bold text-frost-100 capitalize">
+              {mode === 'search' ? `Results for "${heading}"` : `${heading} Skins`}
+            </h1>
+            {exact.tag && <span class="tag capitalize">{exact.tag.type}</span>}
           </div>
           <p class="text-frost-500 text-sm">
-            {total.toLocaleString()} {total === 1 ? 'skin' : 'skins'} tagged with <strong class="text-frost-300">{heading}</strong>
+            {total.toLocaleString()} {total === 1 ? 'skin' : 'skins'}
+            {mode === 'tag' && (<> tagged with <strong class="text-frost-300">{heading}</strong></>)}
+            {mode === 'search' && (<> matched <strong class="text-frost-300">{heading}</strong></>)}
             {totalPages > 1 && ` — page ${currentPage} of ${totalPages}`}
           </p>
         </div>
 
+        {mode === 'search' && matchedTags.length > 0 && (
+          <div class="mb-6">
+            <p class="text-xs text-frost-500 uppercase tracking-wider mb-2">Related tags</p>
+            <div class="flex flex-wrap gap-2">
+              {matchedTags.map((t) => (
+                <a href={`/tag/${t.slug}`} class="tag hover:no-underline">
+                  {t.name}
+                  {t.count > 0 && <span class="ml-1.5 text-frost-500 text-xs">({t.count})</span>}
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
         <SkinGrid skins={items} adFrequency={12} />
         <Pagination currentPage={currentPage} totalPages={totalPages} baseUrl={`/tag/${tagSlug}`} />
       </>
-    ) : (
+    )}
+
+    {mode === 'empty' && (
       <>
         <div class="card-frost p-8 mb-10 text-center">
           <h1 class="text-2xl sm:text-3xl font-bold text-frost-100 mb-2">
