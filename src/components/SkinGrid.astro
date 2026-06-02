@@ -1,26 +1,18 @@
 ---
 import type { SkinCardData } from '../lib/db/queries';
 import SkinCard from './SkinCard.astro';
-import AdSlot from './AdSlot.astro';
 
 interface Props {
   skins: SkinCardData[];
   adFrequency?: number;
 }
 
-const { skins, adFrequency = 12 } = Astro.props;
+const { skins } = Astro.props;
 ---
 {skins.length > 0 ? (
   <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 sm:gap-4">
-    {skins.map((skin, i) => (
-      <>
-        {i > 0 && i % adFrequency === 0 && (
-          <div class="col-span-full">
-            <AdSlot adSlot="grid-inline" format="horizontal" label="Advertisement" />
-          </div>
-        )}
-        <SkinCard skin={skin} />
-      </>
+    {skins.map((skin) => (
+      <SkinCard skin={skin} />
     ))}
   </div>
 ) : (

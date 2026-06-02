@@ -3,7 +3,6 @@ import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import Seo from '../components/Seo.astro';
-import AdSlot from '../components/AdSlot.astro';
 
 interface Props {
   title: string;
@@ -49,40 +48,8 @@ const adsenseClient = import.meta.env.PUBLIC_ADSENSE_CLIENT;
   </head>
   <body class="flex min-h-screen flex-col">
     <Header />
-
-    <!-- Sticky side-rail skyscraper ads, only shown on screens wide enough
-         to have empty gutters next to the 7xl content. Hidden under 1440px. -->
-    <aside
-      class="hidden 2xl:flex fixed top-24 left-4 z-30 w-[160px] h-[600px]
-             items-stretch pointer-events-none"
-      aria-label="Left advertisement"
-    >
-      <div class="w-full pointer-events-auto card-frost p-2">
-        <AdSlot adSlot="rail-left" format="vertical" label="Advertisement" />
-      </div>
-    </aside>
-    <aside
-      class="hidden 2xl:flex fixed top-24 right-4 z-30 w-[160px] h-[600px]
-             items-stretch pointer-events-none"
-      aria-label="Right advertisement"
-    >
-      <div class="w-full pointer-events-auto card-frost p-2">
-        <AdSlot adSlot="rail-right" format="vertical" label="Advertisement" />
-      </div>
-    </aside>
-
     <main class="flex-1">
-      <!-- Site-wide top banner -->
-      <div class="container-content pt-4">
-        <AdSlot adSlot="global-top" format="horizontal" label="Advertisement" />
-      </div>
-
       <slot />
-
-      <!-- Site-wide bottom banner -->
-      <div class="container-content pb-8">
-        <AdSlot adSlot="global-bottom" format="horizontal" label="Advertisement" />
-      </div>
     </main>
     <Footer />
   </body>

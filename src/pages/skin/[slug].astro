@@ -1,6 +1,5 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import AdSlot from '../../components/AdSlot.astro';
 import SkinViewer from '../../components/SkinViewer.astro';
 import { getSkinBySlug } from '../../lib/db/queries';
 import { canonicalUrl, avatarUrl, getSiteUrl } from '../../lib/seo';
@@ -89,9 +88,6 @@ const modelTags = skin.tags.filter((t) => t.type === 'model');
           </a>
         </div>
 
-        <div class="w-full">
-          <AdSlot adSlot="skin-sidebar" format="rectangle" label="Sidebar Advertisement" />
-        </div>
       </aside>
 
       <div class="flex-1 min-w-0">
@@ -123,10 +119,6 @@ const modelTags = skin.tags.filter((t) => t.type === 'model');
               <dd class="text-frost-200 capitalize mt-0.5">{skin.model}</dd>
             </div>
           </dl>
-        </div>
-
-        <div>
-          <AdSlot adSlot="skin-content" format="horizontal" label="Content Advertisement" />
         </div>
 
       </div>
