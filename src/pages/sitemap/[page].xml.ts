@@ -4,6 +4,17 @@ import { getSiteUrl } from '../../lib/seo';
 
 const CHUNK_SIZE = 5000;
 
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const { countSkins } = await import('../../lib/db/queries');
+  const total = await countSkins();
+  const pageCount = Math.max(1, Math.ceil(total / CHUNK_SIZE));
+  return Array.from({ length: pageCount }, (_, i) => ({
+    params: { page: String(i) },
+  }));
+}
+
 export const GET: APIRoute = async ({ params }) => {
   const pageParam = params.page ?? '0';
   const page = parseInt(pageParam, 10);

@@ -4,6 +4,8 @@ import { getSiteUrl } from '../lib/seo';
 
 const CHUNK_SIZE = 5000;
 
+export const prerender = true;
+
 export const GET: APIRoute = async () => {
   const total = await countSkins();
   const pageCount = Math.max(1, Math.ceil(total / CHUNK_SIZE));

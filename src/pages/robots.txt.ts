@@ -1,6 +1,8 @@
 import type { APIRoute } from 'astro';
 import { getSiteUrl } from '../lib/seo';
 
+export const prerender = true;
+
 export const GET: APIRoute = () => {
   const siteUrl = getSiteUrl().replace(/\/$/, '');
   const body = [

@@ -1,0 +1,3 @@
+Prerender sitemap and robots.txt for reliable Googlebot fetch 
+ 
+Static generation avoids serverless cold-start timeouts when Search Console fetches /sitemap-index.xml. 
