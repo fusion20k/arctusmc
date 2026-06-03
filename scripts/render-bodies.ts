@@ -84,24 +84,43 @@ async function main() {
   const limitIdx = args.indexOf("--limit");
   const limit = limitIdx !== -1 ? parseInt(args[limitIdx + 1] ?? "0", 10) : 0;
 
-  const allRows = await db
-    .select({ id: skins.id, slug: skins.slug, model: skins.model, texture: skins.texture, avatar: skins.avatar })
-    .from(skins);
+  // Page through metadata only to identify targets; pulling all texture+avatar blobs
+  // at once exceeds libSQL response limits and aborts the connection.
+  const PAGE = 500;
+  const targetIds: number[] = [];
+  let offset = 0;
+  while (true) {
+    const page = await db
+      .select({ id: skins.id, avatar: skins.avatar })
+      .from(skins)
+      .limit(PAGE)
+      .offset(offset);
+    if (page.length === 0) break;
+    for (const r of page) {
+      if (all) {
+        targetIds.push(r.id as number);
+        continue;
+      }
+      const avatarBuf = r.avatar as Uint8Array | null;
+      if (!avatarBuf || avatarBuf.length === 0) {
+        targetIds.push(r.id as number);
+        continue;
+      }
+      if (avatarBuf.length < 24) {
+        targetIds.push(r.id as number);
+        continue;
+      }
+      const view = Buffer.from(avatarBuf.buffer, avatarBuf.byteOffset, avatarBuf.byteLength);
+      const w = view.readUInt32BE(16);
+      const h = view.readUInt32BE(20);
+      if (w === 128 && h === 256) targetIds.push(r.id as number);
+    }
+    if (page.length < PAGE) break;
+    offset += PAGE;
+  }
 
-  // Identify "flat composite" avatars vs already-3D. Flat composites are exactly 128×256 PNGs
-  // produced by sharp; 3D renders are 320×640 from this script (or larger from mc-heads).
-  const targets = all
-    ? allRows
-    : allRows.filter((r) => {
-        const avatarBuf = r.avatar as Uint8Array | null;
-        if (!avatarBuf || avatarBuf.length === 0) return true;
-        // PNG IHDR: bytes 16-19 = width BE, 20-23 = height BE
-        if (avatarBuf.length < 24) return true;
-        const view = Buffer.from(avatarBuf.buffer, avatarBuf.byteOffset, avatarBuf.byteLength);
-        const w = view.readUInt32BE(16);
-        const h = view.readUInt32BE(20);
-        return w === 128 && h === 256;
-      });
+  // Fetch full rows (with texture) only for selected targets, one at a time during work.
+  const targets = targetIds.map((id) => ({ id }));
 
   const work = limit > 0 ? targets.slice(0, limit) : targets;
   console.log(`Rendering ${work.length} skins in 3D (concurrency=${CONCURRENCY}, batch=${BATCH_SIZE})`);
@@ -122,17 +141,27 @@ async function main() {
       if (idx >= work.length) return;
       const row = work[idx]!;
       try {
-        const tex = Buffer.from(row.texture as Uint8Array);
-        const model: "classic" | "slim" = row.model === "slim" ? "slim" : "classic";
+        const full = await db
+          .select({ slug: skins.slug, model: skins.model, texture: skins.texture })
+          .from(skins)
+          .where(eq(skins.id, row.id))
+          .limit(1);
+        const f = full[0];
+        if (!f) {
+          fail++;
+          continue;
+        }
+        const tex = Buffer.from(f.texture as Uint8Array);
+        const model: "classic" | "slim" = f.model === "slim" ? "slim" : "classic";
         const avatar = await renderOne(page, tex, model);
         await db.update(skins).set({ avatar }).where(eq(skins.id, row.id));
         ok++;
         if (ok % 25 === 0) {
-          console.log(`  ${ok}/${work.length} (fail=${fail}) last=${row.slug}`);
+          console.log(`  ${ok}/${work.length} (fail=${fail}) last=${f.slug}`);
         }
       } catch (e) {
         fail++;
-        console.warn(`  fail ${row.slug}: ${(e as Error).message}`);
+        console.warn(`  fail id=${row.id}: ${(e as Error).message}`);
         // Recover worker by reloading the page if it broke.
         try {
           await page.setContent(VIEWER_HTML, { waitUntil: "domcontentloaded" });
