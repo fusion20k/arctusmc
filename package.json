@@ -10,6 +10,7 @@
     "check": "astro check",
     "lint": "eslint .",
     "ingest": "tsx scripts/ingest.ts",
+    "render-bodies": "tsx scripts/render-bodies.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate"
   },
