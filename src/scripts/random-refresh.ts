@@ -33,7 +33,7 @@ const buildCard = (skin: SkinCardData): HTMLAnchorElement => {
   card.innerHTML = `
     <div class="aspect-square skin-checker flex items-center justify-center p-3">
       <img
-        src="/api/avatar/${skin.slug}.png?v=7"
+        src="/api/avatar/${skin.slug}.png?v=8"
         alt="Minecraft skin"
         width="160"
         height="320"
@@ -55,7 +55,7 @@ const handleClick = async () => {
   setBusy(true);
 
   try {
-    const res = await fetch('/api/random.json');
+    const res = await fetch(`/api/random.json?t=${Date.now()}`, { cache: 'no-store' });
     if (!res.ok) throw new Error('fetch failed');
 
     const data = (await res.json()) as { skins: SkinCardData[] };

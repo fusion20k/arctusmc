@@ -35,7 +35,10 @@ viewer.cameraLight.intensity = 0.6;
 
 window.__renderSkin = async (base64, model) => {
   const url = "data:image/png;base64," + base64;
-  await viewer.loadSkin(url, { model });
+  const sv3dModel = model === 'slim' ? 'slim' : 'default';
+  await viewer.loadSkin(url, { model: sv3dModel });
+  viewer.render();
+  await new Promise((r) => requestAnimationFrame(r));
   viewer.render();
   await new Promise((r) => requestAnimationFrame(r));
   viewer.render();

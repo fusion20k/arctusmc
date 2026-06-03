@@ -80,19 +80,34 @@ function toCardData(
 }
 
 export async function getRandomSkins(n: number): Promise<SkinCardData[]> {
-  const rows = await db
-    .select({
-      id: skins.id,
-      slug: skins.slug,
-      display_name: skins.display_name,
-      source_username: skins.source_username,
-      model: skins.model,
-      description: skins.description,
-      created_at: skins.created_at,
-    })
-    .from(skins)
-    .orderBy(sql`RANDOM()`)
-    .limit(n);
+  const [{ total }] = await db.select({ total: count() }).from(skins);
+  if (total === 0) return [];
+
+  const offsets = new Set<number>();
+  while (offsets.size < Math.min(n, total)) {
+    offsets.add(Math.floor(Math.random() * total));
+  }
+
+  const rowArrays = await Promise.all(
+    Array.from(offsets).map((offset) =>
+      db
+        .select({
+          id: skins.id,
+          slug: skins.slug,
+          display_name: skins.display_name,
+          source_username: skins.source_username,
+          model: skins.model,
+          description: skins.description,
+          created_at: skins.created_at,
+        })
+        .from(skins)
+        .orderBy(asc(skins.id))
+        .limit(1)
+        .offset(offset),
+    ),
+  );
+
+  const rows = rowArrays.flat().filter((r): r is NonNullable<typeof r> => r !== undefined);
   const tagRows = await getTagsForSkinIds(rows.map((r) => r.id));
   return toCardData(rows, tagRows);
 }
