@@ -7,7 +7,7 @@ interface Props {
 
 const { skin } = Astro.props;
 const displayName = skin.display_name ?? skin.source_username ?? skin.slug;
-const avatarSrc = `/api/avatar/${skin.slug}.png?v=8`;
+const avatarSrc = `/api/avatar/${skin.slug}.png?v=9`;
 ---
 <a
   href={`/skin/${skin.slug}`}
