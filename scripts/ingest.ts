@@ -7,6 +7,7 @@ import { skins, tags, skinTags } from "../src/lib/db/schema.js";
 import { extractColorTags } from "../src/lib/colors.js";
 import { generateDescription, generateDisplayName } from "../src/lib/description.js";
 import { createBodyRenderer, type BodyRenderer } from "../src/lib/render-body.js";
+import { analyzeBodyQuality } from "../src/lib/texture-quality.js";
 
 let bodyRenderer: BodyRenderer | null = null;
 async function getBodyRenderer(): Promise<BodyRenderer> {
@@ -17,6 +18,8 @@ async function getBodyRenderer(): Promise<BodyRenderer> {
 const CONCURRENCY = 3;
 const INTER_REQUEST_DELAY_MS = 300;
 const BATCH_SIZE = 10;
+const MAX_BODY_BLACK_FRACTION = 0.85;
+const MIN_BODY_UNIQUE_COLORS = 3;
 
 interface ParsedArgs {
   source: "mojang" | "mineskin";
@@ -321,6 +324,22 @@ async function extractPixels(
   return { data, channels: info.channels };
 }
 
+async function getLowQualityBodyReason(textureBytes: Buffer): Promise<string | null> {
+  const stats = await analyzeBodyQuality(textureBytes);
+  if (!stats) {
+    return "low-quality body: invalid texture dimensions";
+  }
+
+  if (
+    stats.bodyBlackFraction > MAX_BODY_BLACK_FRACTION ||
+    stats.bodyUniqueColors <= MIN_BODY_UNIQUE_COLORS
+  ) {
+    return `low-quality body: body_black_fraction=${stats.bodyBlackFraction.toFixed(4)}, body_unique_colors=${stats.bodyUniqueColors}`;
+  }
+
+  return null;
+}
+
 async function upsertTagsAndGetIds(
   tagEntries: { slug: string; name: string; type: string }[],
 ): Promise<number[]> {
@@ -385,6 +404,12 @@ async function processSkin(
     const dims = await validateTexture(textureBytes);
     if (!dims) {
       console.log(`  Skipped: invalid texture dimensions`);
+      return;
+    }
+
+    const lowQualityReason = await getLowQualityBodyReason(textureBytes);
+    if (lowQualityReason) {
+      console.log(`  Skipped: ${lowQualityReason}`);
       return;
     }
 
@@ -522,6 +547,13 @@ async function processMineskinEntry(
     const dims = await validateTexture(textureBytes);
     if (!dims) {
       stats.skip++;
+      return;
+    }
+
+    const lowQualityReason = await getLowQualityBodyReason(textureBytes);
+    if (lowQualityReason) {
+      stats.skip++;
+      console.log(`  Skipped mineskin ${entry.id}: ${lowQualityReason}`);
       return;
     }
 

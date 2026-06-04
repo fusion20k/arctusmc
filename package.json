@@ -11,6 +11,7 @@
     "lint": "eslint .",
     "ingest": "tsx scripts/ingest.ts",
     "render-bodies": "tsx scripts/render-bodies.ts",
+    "prune-low-quality": "tsx scripts/prune-low-quality-skins.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate"
   },
