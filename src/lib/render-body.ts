@@ -1,66 +1,8 @@
 import { chromium, type Browser, type Page } from "playwright";
-import sharp from "sharp";
+import { expandLegacySkin, normalizeLayer1BodyAlpha } from "./texture-quality.js";
 
 const WIDTH = 320;
 const HEIGHT = 640;
-
-type Rect = { left: number; top: number; width: number; height: number };
-
-function getLayer1BodyRects(height: number): Rect[] {
-  const common: Rect[] = [
-    { left: 16, top: 16, width: 24, height: 16 },
-    { left: 0, top: 16, width: 16, height: 16 },
-    { left: 40, top: 16, width: 16, height: 16 },
-  ];
-  if (height === 64) {
-    return [
-      ...common,
-      { left: 16, top: 48, width: 16, height: 16 },
-      { left: 32, top: 48, width: 16, height: 16 },
-    ];
-  }
-  return common;
-}
-
-async function normalizeLayer1BodyAlpha(textureBytes: Buffer): Promise<Buffer> {
-  const { data, info } = await sharp(textureBytes)
-    .ensureAlpha()
-    .raw()
-    .toBuffer({ resolveWithObject: true });
-
-  if (info.width !== 64 || (info.height !== 64 && info.height !== 32)) {
-    return textureBytes;
-  }
-
-  const patched = Buffer.from(data);
-  const rects = getLayer1BodyRects(info.height);
-
-  for (const rect of rects) {
-    for (let y = rect.top; y < rect.top + rect.height; y++) {
-      for (let x = rect.left; x < rect.left + rect.width; x++) {
-        const idx = (y * info.width + x) * info.channels;
-        if (patched[idx + 3]! < 255) {
-          if (patched[idx] === 0 && patched[idx + 1] === 0 && patched[idx + 2] === 0) {
-            patched[idx] = 56;
-            patched[idx + 1] = 56;
-            patched[idx + 2] = 56;
-          }
-          patched[idx + 3] = 255;
-        }
-      }
-    }
-  }
-
-  return sharp(patched, {
-    raw: {
-      width: info.width,
-      height: info.height,
-      channels: info.channels,
-    },
-  })
-    .png()
-    .toBuffer();
-}
 
 const VIEWER_HTML = `<!doctype html>
 <html><head><meta charset="utf-8" />
@@ -125,7 +67,8 @@ export async function createBodyRenderer(): Promise<BodyRenderer> {
   return {
     async render(textureBytes, model) {
       try {
-        const normalizedTexture = await normalizeLayer1BodyAlpha(textureBytes);
+        const expandedTexture = await expandLegacySkin(textureBytes);
+        const normalizedTexture = await normalizeLayer1BodyAlpha(expandedTexture);
         const base64 = normalizedTexture.toString("base64");
         const dataUrl = await page.evaluate(
           async ([b64, m]) => {

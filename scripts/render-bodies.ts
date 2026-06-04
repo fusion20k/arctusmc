@@ -2,7 +2,7 @@ import { chromium, type Page, type Browser } from "playwright";
 import { eq, inArray } from "drizzle-orm";
 import { db } from "../src/lib/db/client.js";
 import { skins } from "../src/lib/db/schema.js";
-import { normalizeLayer1BodyAlpha } from "../src/lib/texture-quality.js";
+import { expandLegacySkin, normalizeLayer1BodyAlpha } from "../src/lib/texture-quality.js";
 
 const WIDTH = 320;
 const HEIGHT = 640;
@@ -65,7 +65,8 @@ async function renderOne(
   textureBytes: Buffer,
   model: "classic" | "slim",
 ): Promise<Buffer> {
-  const normalizedTexture = await normalizeLayer1BodyAlpha(textureBytes);
+  const expandedTexture = await expandLegacySkin(textureBytes);
+  const normalizedTexture = await normalizeLayer1BodyAlpha(expandedTexture);
   const base64 = normalizedTexture.toString("base64");
   const dataUrl = await page.evaluate(
     async ([b64, m]) => {

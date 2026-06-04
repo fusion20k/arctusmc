@@ -2,6 +2,61 @@ import sharp from "sharp";
 
 export type Rect = { left: number; top: number; width: number; height: number };
 
+export async function expandLegacySkin(textureBytes: Buffer): Promise<Buffer> {
+  const { data, info } = await sharp(textureBytes)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+
+  if (info.width !== 64 || info.height !== 32) {
+    return textureBytes;
+  }
+
+  const channels = info.channels;
+  const out = Buffer.alloc(64 * 64 * channels, 0);
+
+  for (let y = 0; y < 32; y++) {
+    for (let x = 0; x < 64; x++) {
+      const srcIdx = (y * 64 + x) * channels;
+      const dstIdx = (y * 64 + x) * channels;
+      out[dstIdx] = data[srcIdx] ?? 0;
+      out[dstIdx + 1] = data[srcIdx + 1] ?? 0;
+      out[dstIdx + 2] = data[srcIdx + 2] ?? 0;
+      out[dstIdx + 3] = data[srcIdx + 3] ?? 0;
+    }
+  }
+
+  const mirrorRegion = (srcLeft: number, srcTop: number, dstLeft: number, dstTop: number) => {
+    for (let y = 0; y < 16; y++) {
+      for (let x = 0; x < 16; x++) {
+        const sx = srcLeft + (15 - x);
+        const sy = srcTop + y;
+        const dx = dstLeft + x;
+        const dy = dstTop + y;
+        const srcIdx = (sy * 64 + sx) * channels;
+        const dstIdx = (dy * 64 + dx) * channels;
+        out[dstIdx] = data[srcIdx] ?? 0;
+        out[dstIdx + 1] = data[srcIdx + 1] ?? 0;
+        out[dstIdx + 2] = data[srcIdx + 2] ?? 0;
+        out[dstIdx + 3] = data[srcIdx + 3] ?? 0;
+      }
+    }
+  };
+
+  mirrorRegion(40, 16, 32, 48);
+  mirrorRegion(0, 16, 16, 48);
+
+  return sharp(out, {
+    raw: {
+      width: 64,
+      height: 64,
+      channels,
+    },
+  })
+    .png()
+    .toBuffer();
+}
+
 export interface BodyQualityStats {
   bodyPixelCount: number;
   blackPixelCount: number;

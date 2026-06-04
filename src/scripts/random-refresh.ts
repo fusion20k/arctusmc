@@ -33,7 +33,7 @@ const buildCard = (skin: SkinCardData): HTMLAnchorElement => {
   card.innerHTML = `
     <div class="aspect-square skin-checker flex items-center justify-center p-3">
       <img
-        src="/api/avatar/${skin.slug}.png?v=9"
+        src="/api/avatar/${skin.slug}.png?v=10"
         alt="Minecraft skin"
         width="160"
         height="320"
